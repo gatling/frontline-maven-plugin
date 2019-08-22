@@ -9,7 +9,7 @@
 
   <groupId>io.gatling.frontline</groupId>
   <artifactId>frontline-maven-plugin</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
   <name>frontline-maven-plugin</name>
   <description>frontline-maven-plugin</description>
   <packaging>maven-plugin</packaging>
