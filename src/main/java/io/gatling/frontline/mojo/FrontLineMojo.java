@@ -22,6 +22,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.util.SelectorUtils;
 import org.zeroturnaround.zip.ZipUtil;
@@ -63,17 +64,23 @@ public class FrontLineMojo extends AbstractMojo {
     GATLING_GROUP_IDS = Collections.unmodifiableSet(groupIds);
   }
 
+  @Component
+  private RepositorySystem repository;
+
+  @Component
+  private MavenProjectHelper projectHelper;
+
   @Parameter(defaultValue = "${project}", readonly = true)
   private MavenProject project;
 
   @Parameter(defaultValue = "${session}", readonly = true)
   private MavenSession session;
 
-  @Component
-  private RepositorySystem repository;
-
   @Parameter
   private String[] excludes;
+
+  @Parameter(defaultValue = "shaded")
+  private String shadedClassifier;
 
   private Set<Artifact> nonGatlingDependencies(Artifact artifact) {
     if (artifact == null) {
@@ -152,7 +159,6 @@ public class FrontLineMojo extends AbstractMojo {
       throw new MojoExecutionException("Failed to generate manifest", e);
     }
 
-    // rename original artifact
     File originalArtifact = project.getArtifact().getFile();
 
     if (originalArtifact == null || !originalArtifact.isFile()) {
@@ -164,6 +170,9 @@ public class FrontLineMojo extends AbstractMojo {
     // generate jar
     getLog().info("Generating FrontLine shaded jar " + shaded);
     ZipUtil.pack(workingDir, shaded);
+
+    // attach jar so it can be deployed
+    projectHelper.attachArtifact(project, "jar", shadedClassifier, shaded);
 
     try {
       FileUtilsV2_2.deleteDirectory(workingDir);
