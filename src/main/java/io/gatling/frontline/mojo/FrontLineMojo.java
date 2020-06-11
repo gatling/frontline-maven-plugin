@@ -145,9 +145,20 @@ public class FrontLineMojo extends AbstractMojo {
       throw new MojoExecutionException("Failed to copy compiled classes", e);
     }
 
+    // generate META-INF directory
+    File metaInfDir = new File(workingDir, "META-INF");
+    metaInfDir.mkdirs();
+
+    // generate version file
+    File gatlingVersion = new File(metaInfDir, "gatling-compile-version.properties");
+    try (FileWriter fw = new FileWriter(gatlingVersion)) {
+      fw.write("gatling-compile-version=" + gatlingApp.getVersion());
+    } catch (IOException e) {
+      throw new MojoExecutionException("Failed to generate manifest", e);
+    }
+
     // generate fake manifest
-    File manifest = new File(new File(workingDir, "META-INF"), "MANIFEST.MF");
-    manifest.getParentFile().mkdirs();
+    File manifest = new File(metaInfDir, "MANIFEST.MF");
 
     try (FileWriter fw = new FileWriter(manifest)) {
       fw.write("Manifest-Version: 1.0\n");
