@@ -9,7 +9,7 @@
 
   <groupId>io.gatling.frontline</groupId>
   <artifactId>frontline-maven-plugin</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <name>frontline-maven-plugin</name>
   <description>frontline-maven-plugin</description>
   <packaging>maven-plugin</packaging>
@@ -46,8 +46,8 @@
     <encoding>UTF-8</encoding>
 
     <maven3.version>3.0</maven3.version>
-    <zt-zip.version>1.13</zt-zip.version>
-    <plexus-utils.version>3.1.0</plexus-utils.version>
+    <zt-zip.version>1.14</zt-zip.version>
+    <plexus-utils.version>3.3.0</plexus-utils.version>
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     <header.basedir>${project.basedir}</header.basedir>
     <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
