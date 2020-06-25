@@ -149,14 +149,6 @@ public class FrontLineMojo extends AbstractMojo {
     File metaInfDir = new File(workingDir, "META-INF");
     metaInfDir.mkdirs();
 
-    // generate version file
-    File gatlingVersion = new File(metaInfDir, "gatling-compile-version.properties");
-    try (FileWriter fw = new FileWriter(gatlingVersion)) {
-      fw.write("gatling-compile-version=" + gatlingApp.getVersion());
-    } catch (IOException e) {
-      throw new MojoExecutionException("Failed to generate manifest", e);
-    }
-
     // generate fake manifest
     File manifest = new File(metaInfDir, "MANIFEST.MF");
 
@@ -164,8 +156,9 @@ public class FrontLineMojo extends AbstractMojo {
       fw.write("Manifest-Version: 1.0\n");
       fw.write("Implementation-Title: " + project.getArtifactId() + "\n");
       fw.write("Implementation-Version: " + project.getVersion() + "\n");
-      fw.write("Specification-Vendor: " + project.getGroupId() + "\n");
-      fw.write("Implementation-Vendor: GatlingCorp\n");
+      fw.write("Implementation-Vendor: " + project.getGroupId() + "\n");
+      fw.write("Specification-Vendor: GatlingCorp\n");
+      fw.write("Gatling-Version: " + gatlingApp.getVersion() + "\n");
     } catch (IOException e) {
       throw new MojoExecutionException("Failed to generate manifest", e);
     }
