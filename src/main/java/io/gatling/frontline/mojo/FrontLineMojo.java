@@ -46,6 +46,7 @@ public class FrontLineMojo extends AbstractMojo {
   private static final String[] ALWAYS_EXCLUDES = new String[]{
     "META-INF/LICENSE",
     "META-INF/MANIFEST.MF",
+    "META-INF/versions/*",
     "*.SF",
     "*.DSA",
     "*.RSA"
