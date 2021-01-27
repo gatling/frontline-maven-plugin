@@ -113,6 +113,7 @@ public class FrontLineMojo extends AbstractMojo {
     Set<Artifact> filteredDeps = allDeps.stream()
       .filter(artifact ->
         !GATLING_GROUP_IDS.contains(artifact.getGroupId())
+        && !(artifact.getGroupId().equals("io.netty") && artifact.getArtifactId().equals("netty-all"))
         && artifactNotIn(artifact, gatlingDependencies)
       ).collect(Collectors.toSet());
 
