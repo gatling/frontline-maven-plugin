@@ -1,11 +1,12 @@
-/**
- * Copyright 2018-2019 GatlingCorp (http://gatling.io)
+
+/*
+ * Copyright 2011-2021 GatlingCorp (https://gatling.io)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 		http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +16,15 @@
  */
 package io.gatling.frontline.mojo;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.execution.MavenSession;
@@ -28,29 +38,16 @@ import org.codehaus.plexus.util.SelectorUtils;
 import org.zeroturnaround.zip.ZipUtil;
 import org.zeroturnaround.zip.commons.FileUtilsV2_2;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-@Mojo(name = "package",
-  defaultPhase = LifecyclePhase.PACKAGE,
-  requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(
+    name = "package",
+    defaultPhase = LifecyclePhase.PACKAGE,
+    requiresDependencyResolution = ResolutionScope.TEST)
 public class FrontLineMojo extends AbstractMojo {
 
-  private static final String[] ALWAYS_EXCLUDES = new String[]{
-    "META-INF/LICENSE",
-    "META-INF/MANIFEST.MF",
-    "META-INF/versions/*",
-    "*.SF",
-    "*.DSA",
-    "*.RSA"
-  };
+  private static final String[] ALWAYS_EXCLUDES =
+      new String[] {
+        "META-INF/LICENSE", "META-INF/MANIFEST.MF", "META-INF/versions/*", "*.SF", "*.DSA", "*.RSA"
+      };
 
   private static String GATLING_GROUP_ID = "io.gatling";
   private static String GATLING_HIGHCHARTS_GROUP_ID = "io.gatling.highcharts";
@@ -65,11 +62,9 @@ public class FrontLineMojo extends AbstractMojo {
     GATLING_GROUP_IDS = Collections.unmodifiableSet(groupIds);
   }
 
-  @Component
-  private RepositorySystem repository;
+  @Component private RepositorySystem repository;
 
-  @Component
-  private MavenProjectHelper projectHelper;
+  @Component private MavenProjectHelper projectHelper;
 
   @Parameter(defaultValue = "${project}", readonly = true)
   private MavenProject project;
@@ -77,8 +72,7 @@ public class FrontLineMojo extends AbstractMojo {
   @Parameter(defaultValue = "${session}", readonly = true)
   private MavenSession session;
 
-  @Parameter
-  private String[] excludes;
+  @Parameter private String[] excludes;
 
   @Parameter(defaultValue = "shaded")
   private String shadedClassifier;
@@ -89,8 +83,8 @@ public class FrontLineMojo extends AbstractMojo {
     }
 
     return resolveTransitively(artifact).stream()
-      .filter(art -> !GATLING_GROUP_IDS.contains(art.getGroupId()))
-      .collect(Collectors.toSet());
+        .filter(art -> !GATLING_GROUP_IDS.contains(art.getGroupId()))
+        .collect(Collectors.toSet());
   }
 
   @Override
@@ -99,11 +93,15 @@ public class FrontLineMojo extends AbstractMojo {
     Set<Artifact> allDeps = project.getArtifacts();
 
     Artifact gatlingApp = findByGroupIdAndArtifactId(allDeps, GATLING_GROUP_ID, "gatling-app");
-    Artifact gatlingChartsHighcharts = findByGroupIdAndArtifactId(allDeps, GATLING_HIGHCHARTS_GROUP_ID, "gatling-charts-highcharts");
-    Artifact frontlineProbe = findByGroupIdAndArtifactId(allDeps, GATLING_FRONTLINE_GROUP_ID, "frontline-probe");
+    Artifact gatlingChartsHighcharts =
+        findByGroupIdAndArtifactId(
+            allDeps, GATLING_HIGHCHARTS_GROUP_ID, "gatling-charts-highcharts");
+    Artifact frontlineProbe =
+        findByGroupIdAndArtifactId(allDeps, GATLING_FRONTLINE_GROUP_ID, "frontline-probe");
 
     if (gatlingApp == null) {
-      throw new MojoExecutionException("Couldn't find io.gatling:gatling-app in project dependencies");
+      throw new MojoExecutionException(
+          "Couldn't find io.gatling:gatling-app in project dependencies");
     }
 
     Set<Artifact> gatlingDependencies = new HashSet<>();
@@ -111,12 +109,15 @@ public class FrontLineMojo extends AbstractMojo {
     gatlingDependencies.addAll(nonGatlingDependencies(gatlingChartsHighcharts));
     gatlingDependencies.addAll(nonGatlingDependencies(frontlineProbe));
 
-    Set<Artifact> filteredDeps = allDeps.stream()
-      .filter(artifact ->
-        !GATLING_GROUP_IDS.contains(artifact.getGroupId())
-        && !(artifact.getGroupId().equals("io.netty") && artifact.getArtifactId().equals("netty-all"))
-        && artifactNotIn(artifact, gatlingDependencies)
-      ).collect(Collectors.toSet());
+    Set<Artifact> filteredDeps =
+        allDeps.stream()
+            .filter(
+                artifact ->
+                    !GATLING_GROUP_IDS.contains(artifact.getGroupId())
+                        && !(artifact.getGroupId().equals("io.netty")
+                            && artifact.getArtifactId().equals("netty-all"))
+                        && artifactNotIn(artifact, gatlingDependencies))
+            .collect(Collectors.toSet());
 
     File workingDir;
     try {
@@ -138,10 +139,18 @@ public class FrontLineMojo extends AbstractMojo {
 
     try {
       if (outputDirectory.exists()) {
-        FileUtilsV2_2.copyDirectory(outputDirectory, workingDir, pathname -> !exclude(outputDirectoryPath.relativize(pathname.toPath()).toString()), false);
+        FileUtilsV2_2.copyDirectory(
+            outputDirectory,
+            workingDir,
+            pathname -> !exclude(outputDirectoryPath.relativize(pathname.toPath()).toString()),
+            false);
       }
       if (testOutputDirectory.exists()) {
-        FileUtilsV2_2.copyDirectory(testOutputDirectory, workingDir, pathname -> !exclude(testOutputDirectoryPath.relativize(pathname.toPath()).toString()), false);
+        FileUtilsV2_2.copyDirectory(
+            testOutputDirectory,
+            workingDir,
+            pathname -> !exclude(testOutputDirectoryPath.relativize(pathname.toPath()).toString()),
+            false);
       }
     } catch (IOException e) {
       throw new MojoExecutionException("Failed to copy compiled classes", e);
@@ -171,7 +180,10 @@ public class FrontLineMojo extends AbstractMojo {
       throw new MojoExecutionException("Original main artifact is invalid: " + originalArtifact);
     }
 
-    File shaded = new File(originalArtifact.getParent(), originalArtifact.getName().replace(".jar", "-shaded.jar"));
+    File shaded =
+        new File(
+            originalArtifact.getParent(),
+            originalArtifact.getName().replace(".jar", "-shaded.jar"));
 
     // generate jar
     getLog().info("Generating FrontLine shaded jar " + shaded);
@@ -183,7 +195,7 @@ public class FrontLineMojo extends AbstractMojo {
     try {
       FileUtilsV2_2.deleteDirectory(workingDir);
     } catch (IOException e) {
-      throw new MojoExecutionException("Failed to delete working directory " +  workingDir, e);
+      throw new MojoExecutionException("Failed to delete working directory " + workingDir, e);
     }
   }
 
@@ -207,24 +219,26 @@ public class FrontLineMojo extends AbstractMojo {
 
   private Set<Artifact> resolveTransitively(Artifact artifact) {
     ArtifactResolutionRequest request =
-      new ArtifactResolutionRequest()
-        .setArtifact(artifact)
-        .setResolveRoot(true)
-        .setResolveTransitively(true)
-        .setServers(session.getRequest().getServers())
-        .setMirrors(session.getRequest().getMirrors())
-        .setProxies(session.getRequest().getProxies())
-        .setLocalRepository(session.getLocalRepository())
-        .setRemoteRepositories(session.getCurrentProject().getRemoteArtifactRepositories());
+        new ArtifactResolutionRequest()
+            .setArtifact(artifact)
+            .setResolveRoot(true)
+            .setResolveTransitively(true)
+            .setServers(session.getRequest().getServers())
+            .setMirrors(session.getRequest().getMirrors())
+            .setProxies(session.getRequest().getProxies())
+            .setLocalRepository(session.getLocalRepository())
+            .setRemoteRepositories(session.getCurrentProject().getRemoteArtifactRepositories());
     return repository.resolve(request).getArtifacts();
   }
 
   private static boolean artifactNotIn(Artifact target, Set<Artifact> artifacts) {
-    return findByGroupIdAndArtifactId(artifacts, target.getGroupId(), target.getArtifactId()) == null;
+    return findByGroupIdAndArtifactId(artifacts, target.getGroupId(), target.getArtifactId())
+        == null;
   }
 
-  private static Artifact findByGroupIdAndArtifactId(Set<Artifact> artifacts, String groupId, String artifactId) {
-    for (Artifact artifact: artifacts) {
+  private static Artifact findByGroupIdAndArtifactId(
+      Set<Artifact> artifacts, String groupId, String artifactId) {
+    for (Artifact artifact : artifacts) {
       if (artifact.getGroupId().equals(groupId) && artifact.getArtifactId().equals(artifactId)) {
         return artifact;
       }

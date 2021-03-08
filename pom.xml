@@ -51,6 +51,7 @@
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     <header.basedir>${project.basedir}</header.basedir>
     <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
+    <spotless-maven-plugin.version>2.9.0</spotless-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -143,6 +144,23 @@
             <serverId>sonatype-nexus-staging</serverId>
             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
             <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless-maven-plugin.version}</version>
+          <configuration>
+            <java>
+              <includes>
+                <include>src/main/java/**/*.java</include>
+                <include>src/test/java/**/*.java</include>
+              </includes>
+              <googleJavaFormat />
+              <licenseHeader>
+                <file>${header.basedir}/src/etc/header.txt</file>
+              </licenseHeader>
+            </java>
           </configuration>
         </plugin>
       </plugins>
