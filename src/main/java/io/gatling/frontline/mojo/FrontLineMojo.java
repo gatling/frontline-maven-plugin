@@ -48,8 +48,8 @@ public class FrontLineMojo extends AbstractMojo {
       new String[] {
         "META-INF/LICENSE",
         "META-INF/MANIFEST.MF",
-        "META-INF/versions/*",
-        "META-INF/maven/*",
+        "META-INF/versions/**",
+        "META-INF/maven/**",
         "*.SF",
         "*.DSA",
         "*.RSA"
