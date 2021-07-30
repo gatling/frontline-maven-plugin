@@ -46,7 +46,13 @@ public class FrontLineMojo extends AbstractMojo {
 
   private static final String[] ALWAYS_EXCLUDES =
       new String[] {
-        "META-INF/LICENSE", "META-INF/MANIFEST.MF", "META-INF/versions/*", "*.SF", "*.DSA", "*.RSA"
+        "META-INF/LICENSE",
+        "META-INF/MANIFEST.MF",
+        "META-INF/versions/*",
+        "META-INF/maven/*",
+        "*.SF",
+        "*.DSA",
+        "*.RSA"
       };
 
   private static String GATLING_GROUP_ID = "io.gatling";
@@ -159,6 +165,33 @@ public class FrontLineMojo extends AbstractMojo {
     // generate META-INF directory
     File metaInfDir = new File(workingDir, "META-INF");
     metaInfDir.mkdirs();
+
+    // generate maven files directory
+    File mavenDir = new File(new File(new File(metaInfDir, "maven"), project.getGroupId()), project.getArtifactId());
+    mavenDir.mkdirs();
+
+    // generate pom.properties
+    try (FileWriter fw = new FileWriter(new File(mavenDir, "pom.properties"))) {
+      fw.write("groupId=" + project.getGroupId() + "\n");
+      fw.write("artifactId=" + project.getArtifactId() + "\n");
+      fw.write("version=" + project.getVersion() + "\n");
+    } catch (IOException e) {
+      throw new MojoExecutionException("Failed to generate pom.properties", e);
+    }
+
+    // generate pom.xml
+    try (FileWriter fw = new FileWriter(new File(mavenDir, "pom.xml"))) {
+      fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n");
+      fw.write("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + "\n");
+      fw.write("    xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">" + "\n");
+      fw.write("    <modelVersion>4.0.0</modelVersion>" + "\n");
+      fw.write("    <groupId>" + project.getGroupId() + "</groupId>" +  "\n");
+      fw.write("    <artifactId>" + project.getArtifactId() + "</artifactId>" + "\n");
+      fw.write("    <version>" + project.getVersion() + "</version>" +"\n");
+      fw.write("</project>");
+    } catch (IOException e) {
+      throw new MojoExecutionException("Failed to generate pom.properties", e);
+    }
 
     // generate fake manifest
     File manifest = new File(metaInfDir, "MANIFEST.MF");
